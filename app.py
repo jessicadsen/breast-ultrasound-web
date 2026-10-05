@@ -264,7 +264,7 @@ except Exception as exc:
 # ============================================================
 
 st.markdown(
-    '<div class="brand">YOLO26 / ACADEMIC RESEARCH</div>',
+    '<div class="brand">YOLOv26 / CSS181-02</div>',
     unsafe_allow_html=True,
 )
 
@@ -555,7 +555,7 @@ if uploaded_file is not None:
 
 st.markdown(
     '<div class="footer">'
-    'BREAST ULTRASOUND SEGMENTATION &nbsp;·&nbsp; YOLO26'
+    'FERNANDEZ · GONZALES · MACAYAN · REALOSA · SENO'
     '</div>',
     unsafe_allow_html=True,
 )

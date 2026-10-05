@@ -1,7 +1,8 @@
-import streamlit as st
-from ultralytics import YOLO
-from PIL import Image
 import time
+
+import streamlit as st
+from PIL import Image
+from ultralytics import YOLO
 
 
 # ============================================================
@@ -12,7 +13,7 @@ st.set_page_config(
     page_title="Breast Ultrasound Segmentation",
     page_icon="◈",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
 
 
@@ -20,208 +21,225 @@ st.set_page_config(
 # CUSTOM CSS
 # ============================================================
 
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
+        .stApp {
+            background: #0D0D0D;
+            color: #F2F2F2;
+        }
 
-    .stApp {
-        background: #0D0D0D;
-        color: #F2F2F2;
-    }
+        .block-container {
+            max-width: 1120px;
+            padding-top: 3.2rem;
+            padding-bottom: 2.5rem;
+        }
 
-    .block-container {
-        max-width: 1100px;
-        padding-top: 4rem;
-        padding-bottom: 3rem;
-    }
+        .brand {
+            font-size: 0.68rem;
+            letter-spacing: 3px;
+            color: #777777;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
 
-    /* HEADER */
+        .title {
+            font-size: 2.75rem;
+            line-height: 1.05;
+            font-weight: 500;
+            letter-spacing: -1.5px;
+            color: #F4F4F4;
+            margin-bottom: 0.65rem;
+        }
 
-    .brand {
-        font-size: 0.72rem;
-        letter-spacing: 3px;
-        color: #777777;
-        text-transform: uppercase;
-        margin-bottom: 1.4rem;
-    }
+        .subtitle {
+            color: #858585;
+            font-size: 0.92rem;
+            line-height: 1.55;
+            margin-bottom: 2.5rem;
+            max-width: 760px;
+        }
 
-    .title {
-        font-size: 3rem;
-        line-height: 1.05;
-        font-weight: 500;
-        letter-spacing: -1.5px;
-        color: #F4F4F4;
-        margin-bottom: 0.7rem;
-    }
+        .section-label {
+            font-size: 0.66rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #777777;
+            margin-bottom: 0.75rem;
+        }
 
-    .subtitle {
-        color: #777777;
-        font-size: 0.95rem;
-        margin-bottom: 3rem;
-    }
+        .input-panel {
+            background: #121212;
+            border: 1px solid #292929;
+            border-radius: 7px;
+            padding: 1.25rem 1.35rem 1.1rem;
+            margin-bottom: 1.2rem;
+        }
 
-    /* SECTION LABEL */
+        [data-testid="stFileUploader"] {
+            background: #151515;
+            border: 1px solid #2C2C2C;
+            border-radius: 6px;
+            padding: 0.85rem;
+        }
 
-    .section-label {
-        font-size: 0.68rem;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #777777;
-        margin-bottom: 0.8rem;
-    }
+        [data-testid="stFileUploader"]:hover {
+            border-color: #505050;
+        }
 
-    /* UPLOAD */
+        .threshold-box {
+            background: #151515;
+            border: 1px solid #292929;
+            border-radius: 6px;
+            padding: 0.8rem 1.1rem;
+            margin-top: 1rem;
+        }
 
-    [data-testid="stFileUploader"] {
-        background: #151515;
-        border: 1px solid #2C2C2C;
-        border-radius: 6px;
-        padding: 1.1rem;
-    }
+        .stButton {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.15rem;
+            margin-bottom: 2rem;
+        }
 
-    [data-testid="stFileUploader"]:hover {
-        border-color: #505050;
-    }
+        .stButton > button {
+            width: 230px;
+            height: 42px;
+            background: #E8E8E8;
+            color: #111111;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            transition: 0.2s ease;
+        }
 
-    /* THRESHOLD */
+        .stButton > button:hover {
+            background: #FFFFFF;
+            color: #000000;
+        }
 
-    .threshold-box {
-        background: #131313;
-        border: 1px solid #292929;
-        border-radius: 6px;
-        padding: 1rem 1.3rem;
-        margin-top: 1.2rem;
-    }
+        .analysis-container {
+            background: #131313;
+            border: 1px solid #292929;
+            border-radius: 7px;
+            padding: 1.7rem;
+            margin-top: 0.5rem;
+        }
 
-    /* BUTTON */
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #292929;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
 
-    .stButton {
-        display: flex;
-        justify-content: center;
-        margin-top: 1.4rem;
-        margin-bottom: 3rem;
-    }
+        .analysis-title {
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #AAAAAA;
+        }
 
-    .stButton > button {
-        width: 220px;
-        height: 42px;
-        background: #E8E8E8;
-        color: #111111;
-        border: none;
-        border-radius: 4px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 1.5px;
-        transition: 0.2s ease;
-    }
+        .analysis-status {
+            font-size: 0.65rem;
+            color: #666666;
+            letter-spacing: 1px;
+        }
 
-    .stButton > button:hover {
-        background: #FFFFFF;
-        color: #000000;
-    }
+        .image-label {
+            font-size: 0.65rem;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: #777777;
+            margin-bottom: 0.65rem;
+        }
 
-    /* ANALYSIS */
+        .results {
+            border-top: 1px solid #292929;
+            margin-top: 1.8rem;
+            padding-top: 1.5rem;
+        }
 
-    .analysis-container {
-        background: #131313;
-        border: 1px solid #292929;
-        border-radius: 6px;
-        padding: 2rem;
-        margin-top: 0.5rem;
-    }
+        .metric-card {
+            background: #171717;
+            border: 1px solid #292929;
+            border-radius: 5px;
+            padding: 0.85rem 0.95rem;
+            min-height: 76px;
+        }
 
-    .analysis-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #292929;
-        padding-bottom: 1rem;
-        margin-bottom: 1.7rem;
-    }
+        .result-label {
+            font-size: 0.59rem;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: #666666;
+            margin-bottom: 0.35rem;
+        }
 
-    .analysis-title {
-        font-size: 0.72rem;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: #AAAAAA;
-    }
+        .result-value {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #EEEEEE;
+        }
 
-    .analysis-status {
-        font-size: 0.68rem;
-        color: #666666;
-        letter-spacing: 1px;
-    }
+        .result-subtext {
+            color: #707070;
+            font-size: 0.68rem;
+            margin-top: 0.25rem;
+        }
 
-    /* IMAGES */
+        .warning-box {
+            background: #191919;
+            border: 1px solid #383838;
+            border-radius: 5px;
+            padding: 0.9rem 1.05rem;
+            margin-top: 1rem;
+            color: #AAAAAA;
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
 
-    .image-label {
-        font-size: 0.67rem;
-        letter-spacing: 1.8px;
-        text-transform: uppercase;
-        color: #777777;
-        margin-bottom: 0.7rem;
-    }
+        .disclaimer {
+            color: #5F5F5F;
+            font-size: 0.66rem;
+            line-height: 1.5;
+            margin-top: 1.2rem;
+        }
 
-    /* RESULTS */
+        .footer {
+            text-align: center;
+            color: #444444;
+            font-size: 0.62rem;
+            letter-spacing: 0.8px;
+            margin-top: 2.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid #1F1F1F;
+        }
 
-    .results {
-        border-top: 1px solid #292929;
-        margin-top: 2rem;
-        padding-top: 1.7rem;
-    }
+        #MainMenu,
+        footer {
+            visibility: hidden;
+        }
 
-    .result-label {
-        font-size: 0.62rem;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        color: #666666;
-        margin-bottom: 0.4rem;
-    }
+        header {
+            background: transparent !important;
+        }
 
-    .result-value {
-        font-size: 1.15rem;
-        font-weight: 500;
-        color: #EEEEEE;
-    }
+        [data-testid="stMetricValue"] {
+            color: #EEEEEE;
+        }
 
-    .warning-box {
-        background: #191919;
-        border: 1px solid #383838;
-        border-radius: 5px;
-        padding: 1rem 1.2rem;
-        margin-top: 1rem;
-        color: #AAAAAA;
-        font-size: 0.82rem;
-        line-height: 1.5;
-    }
-
-    /* FOOTER */
-
-    .footer {
-        text-align: center;
-        color: #444444;
-        font-size: 0.65rem;
-        letter-spacing: 0.8px;
-        margin-top: 3rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #1F1F1F;
-    }
-
-    /* HIDE STREAMLIT UI */
-
-    #MainMenu {
-        visibility: hidden;
-    }
-
-    footer {
-        visibility: hidden;
-    }
-
-    header {
-        background: transparent !important;
-    }
-
-</style>
-""", unsafe_allow_html=True)
+        [data-testid="stCaptionContainer"] {
+            color: #707070;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 # ============================================================
@@ -233,7 +251,12 @@ def load_model():
     return YOLO("best.pt")
 
 
-model = load_model()
+try:
+    model = load_model()
+except Exception as exc:
+    st.error("The YOLO26 model could not be loaded.")
+    st.caption(f"Model loading error: {exc}")
+    st.stop()
 
 
 # ============================================================
@@ -241,20 +264,22 @@ model = load_model()
 # ============================================================
 
 st.markdown(
-    '<div class="brand">US-SEG / ACADEMIC RESEARCH</div>',
-    unsafe_allow_html=True
+    '<div class="brand">YOLO26 / ACADEMIC RESEARCH</div>',
+    unsafe_allow_html=True,
 )
 
 st.markdown(
     '<div class="title">Breast Ultrasound<br>Segmentation</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.markdown(
     '<div class="subtitle">'
-    'YOLO26-based instance segmentation for breast ultrasound images'
+    'YOLO26-based instance segmentation for breast ultrasound images. '
+    'Upload an image to obtain the predicted lesion class, confidence, '
+    'segmentation coverage, and inference information.'
     '</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 
@@ -262,16 +287,17 @@ st.markdown(
 # IMAGE INPUT
 # ============================================================
 
-st.markdown(
-    '<div class="section-label">01 / IMAGE INPUT</div>',
-    unsafe_allow_html=True
-)
+st.markdown('<div class="section-label">01 / IMAGE INPUT</div>', unsafe_allow_html=True)
+
+st.markdown('<div class="input-panel">', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
     "Upload ultrasound image",
     type=["jpg", "jpeg", "png"],
-    label_visibility="collapsed"
+    label_visibility="collapsed",
 )
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
@@ -279,10 +305,10 @@ uploaded_file = st.file_uploader(
 # ============================================================
 
 st.markdown(
-    '<div class="section-label" style="margin-top:1.5rem;">'
+    '<div class="section-label" style="margin-top:1.1rem;">'
     'CONFIDENCE THRESHOLD'
     '</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 confidence_threshold = st.slider(
@@ -291,12 +317,16 @@ confidence_threshold = st.slider(
     max_value=0.90,
     value=0.25,
     step=0.05,
-    label_visibility="collapsed"
+    label_visibility="collapsed",
 )
 
-st.caption(
-    f"Only predictions with confidence ≥ {confidence_threshold:.2f} "
-    "will be displayed."
+st.markdown(
+    f'<div class="threshold-box">'
+    f'<span style="color:#888888;font-size:0.76rem;">'
+    f'Predictions displayed at confidence ≥ '
+    f'<strong style="color:#E5E5E5;">{confidence_threshold:.2f}</strong>'
+    f'</span></div>',
+    unsafe_allow_html=True,
 )
 
 
@@ -305,41 +335,30 @@ st.caption(
 # ============================================================
 
 if uploaded_file is not None:
-
-    image = Image.open(uploaded_file)
+    image = Image.open(uploaded_file).convert("RGB")
 
     if st.button("ANALYZE IMAGE"):
-
         start_time = time.perf_counter()
 
         with st.spinner("Processing ultrasound image..."):
-
-            results = model(
-                image,
-                conf=confidence_threshold
-            )
+            results = model(image, conf=confidence_threshold, verbose=False)
 
         inference_time = time.perf_counter() - start_time
-
         result = results[0]
         result_image = result.plot()
-
 
         # ====================================================
         # ANALYSIS CONTAINER
         # ====================================================
 
-        st.markdown(
-            '<div class="analysis-container">',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="analysis-container">', unsafe_allow_html=True)
 
         st.markdown(
             '<div class="analysis-header">'
             '<div class="analysis-title">02 / IMAGE COMPARISON</div>'
             '<div class="analysis-status">ANALYSIS COMPLETE</div>'
             '</div>',
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
         # ====================================================
@@ -349,310 +368,182 @@ if uploaded_file is not None:
         col1, col2 = st.columns(2, gap="large")
 
         with col1:
-
-            st.markdown(
-                '<div class="image-label">Original Image</div>',
-                unsafe_allow_html=True
-            )
-
-            st.image(
-                image,
-                use_container_width=True
-            )
+            st.markdown('<div class="image-label">Original Image</div>', unsafe_allow_html=True)
+            st.image(image, use_container_width=True)
 
         with col2:
-
-            st.markdown(
-                '<div class="image-label">Segmentation Result</div>',
-                unsafe_allow_html=True
-            )
-
-            st.image(
-                result_image,
-                use_container_width=True
-            )
-
+            st.markdown('<div class="image-label">Segmentation Result</div>', unsafe_allow_html=True)
+            st.image(result_image, use_container_width=True)
 
         # ====================================================
         # MODEL OUTPUT
         # ====================================================
 
-        st.markdown(
-            '<div class="results">',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="results">', unsafe_allow_html=True)
+        st.markdown('<div class="section-label">03 / MODEL OUTPUT</div>', unsafe_allow_html=True)
 
-        st.markdown(
-            '<div class="section-label">03 / MODEL OUTPUT</div>',
-            unsafe_allow_html=True
-        )
-
-
-        # ====================================================
-        # DETECTION EXISTS
-        # ====================================================
+        image_width, image_height = image.size
 
         if result.boxes is not None and len(result.boxes) > 0:
-
-            confidences = result.boxes.conf.tolist()
-            class_ids = result.boxes.cls.tolist()
-
-            best_index = confidences.index(max(confidences))
-
-            confidence = confidences[best_index]
-            class_id = int(class_ids[best_index])
-
-            class_name = model.names[class_id]
-
+            confidences = result.boxes.conf.detach().cpu().tolist()
+            class_ids = result.boxes.cls.detach().cpu().tolist()
             instances = len(result.boxes)
 
+            best_index = confidences.index(max(confidences))
+            confidence = float(confidences[best_index])
+            class_id = int(class_ids[best_index])
+            class_name = model.names[class_id]
 
-            # ------------------------------------------------
-            # BASIC RESULTS
-            # ------------------------------------------------
+            # Class distribution across all detected instances.
+            class_counts = {}
+            for detected_id in class_ids:
+                detected_name = model.names[int(detected_id)]
+                class_counts[detected_name] = class_counts.get(detected_name, 0) + 1
 
+            # Bounding-box dimensions for the highest-confidence detection.
+            best_box = result.boxes.xyxy[best_index].detach().cpu().tolist()
+            x1, y1, x2, y2 = best_box
+            bbox_width = max(0.0, x2 - x1)
+            bbox_height = max(0.0, y2 - y1)
+            bbox_area = bbox_width * bbox_height
+            bbox_coverage = (bbox_area / (image_width * image_height)) * 100
+
+            # Calculate a union mask after resizing to the original image size.
+            # This avoids comparing mask pixels from the model's internal mask
+            # resolution directly with the uploaded image dimensions.
+            mask_coverage = None
+            mask_pixels = None
+
+            if result.masks is not None and len(result.masks.data) > 0:
+                import torch.nn.functional as F
+
+                masks = result.masks.data.float().unsqueeze(1)
+                resized_masks = F.interpolate(
+                    masks,
+                    size=(image_height, image_width),
+                    mode="nearest",
+                ).squeeze(1)
+
+                union_mask = (resized_masks > 0.5).any(dim=0)
+                mask_pixels = int(union_mask.sum().item())
+                mask_coverage = (mask_pixels / (image_width * image_height)) * 100
+
+            # Main result cards.
             r1, r2, r3, r4 = st.columns(4)
 
-            with r1:
+            cards = [
+                ("Detected Class", class_name, "Highest-confidence prediction"),
+                ("Confidence", f"{confidence:.1%}", "Highest-confidence detection"),
+                ("Instances", str(instances), "Detected lesion instances"),
+                ("Inference Time", f"{inference_time * 1000:.0f} ms", "Model inference"),
+            ]
 
-                st.markdown(
-                    '<div class="result-label">Detected Class</div>',
-                    unsafe_allow_html=True
+            for column, (label, value, subtext) in zip((r1, r2, r3, r4), cards):
+                with column:
+                    st.markdown(
+                        f'<div class="metric-card">'
+                        f'<div class="result-label">{label}</div>'
+                        f'<div class="result-value">{value}</div>'
+                        f'<div class="result-subtext">{subtext}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+
+            # Segmentation details.
+            st.markdown(
+                '<div style="margin-top:1.5rem;">'
+                '<div class="section-label">SEGMENTATION DETAILS</div>',
+                unsafe_allow_html=True,
+            )
+
+            s1, s2, s3, s4 = st.columns(4)
+
+            detail_cards = [
+                ("Mask Detected", "Yes" if result.masks is not None else "No", "Instance mask output"),
+                (
+                    "Mask Coverage",
+                    f"{mask_coverage:.2f}%" if mask_coverage is not None else "N/A",
+                    "Union of predicted masks",
+                ),
+                ("Bounding Box", f"{bbox_width:.0f} × {bbox_height:.0f} px", "Top prediction"),
+                ("Image Resolution", f"{image_width} × {image_height}", "Uploaded image"),
+            ]
+
+            for column, (label, value, subtext) in zip((s1, s2, s3, s4), detail_cards):
+                with column:
+                    st.markdown(
+                        f'<div class="metric-card">'
+                        f'<div class="result-label">{label}</div>'
+                        f'<div class="result-value">{value}</div>'
+                        f'<div class="result-subtext">{subtext}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+
+            # Detected-class summary, useful during the project defense.
+            if class_counts:
+                summary = " · ".join(
+                    f"{name}: {count}" for name, count in class_counts.items()
                 )
-
                 st.markdown(
-                    f'<div class="result-value">{class_name}</div>',
-                    unsafe_allow_html=True
-                )
-
-            with r2:
-
-                st.markdown(
-                    '<div class="result-label">Confidence</div>',
-                    unsafe_allow_html=True
-                )
-
-                st.markdown(
-                    f'<div class="result-value">{confidence:.1%}</div>',
-                    unsafe_allow_html=True
-                )
-
-            with r3:
-
-                st.markdown(
-                    '<div class="result-label">Instances</div>',
-                    unsafe_allow_html=True
-                )
-
-                st.markdown(
-                    f'<div class="result-value">{instances}</div>',
-                    unsafe_allow_html=True
-                )
-
-            with r4:
-
-                st.markdown(
-                    '<div class="result-label">Inference Time</div>',
-                    unsafe_allow_html=True
-                )
-
-                st.markdown(
-                    f'<div class="result-value">'
-                    f'{inference_time * 1000:.0f} ms'
+                    f'<div class="warning-box">'
+                    f'<strong style="color:#D5D5D5;">Detected classes:</strong> {summary}'
                     f'</div>',
-                    unsafe_allow_html=True
+                    unsafe_allow_html=True,
                 )
-
-
-            # ------------------------------------------------
-            # MASK INFORMATION
-            # ------------------------------------------------
-
-            if result.masks is not None:
-
-                # Image dimensions
-                image_width, image_height = image.size
-
-                total_pixels = image_width * image_height
-
-                # Get segmentation masks
-                masks = result.masks.data
-
-                # Calculate mask coverage
-                mask_pixels = 0
-
-                for mask in masks:
-
-                    mask_resized = (
-                        mask.float()
-                        .cpu()
-                        .numpy()
-                    )
-
-                    mask_pixels += (mask_resized > 0.5).sum()
-
-                mask_coverage = (
-                    mask_pixels / total_pixels
-                ) * 100
-
-
-                st.markdown(
-                    '<div style="margin-top:2rem;">'
-                    '<div class="section-label">'
-                    'SEGMENTATION DETAILS'
-                    '</div>',
-                    unsafe_allow_html=True
-                )
-
-                s1, s2, s3 = st.columns(3)
-
-                with s1:
-
-                    st.markdown(
-                        '<div class="result-label">'
-                        'Mask Detected'
-                        '</div>',
-                        unsafe_allow_html=True
-                    )
-
-                    st.markdown(
-                        '<div class="result-value">Yes</div>',
-                        unsafe_allow_html=True
-                    )
-
-                with s2:
-
-                    st.markdown(
-                        '<div class="result-label">'
-                        'Mask Coverage'
-                        '</div>',
-                        unsafe_allow_html=True
-                    )
-
-                    st.markdown(
-                        f'<div class="result-value">'
-                        f'{mask_coverage:.2f}%'
-                        f'</div>',
-                        unsafe_allow_html=True
-                    )
-
-                with s3:
-
-                    st.markdown(
-                        '<div class="result-label">'
-                        'Image Resolution'
-                        '</div>',
-                        unsafe_allow_html=True
-                    )
-
-                    st.markdown(
-                        f'<div class="result-value">'
-                        f'{image_width} × {image_height}'
-                        f'</div>',
-                        unsafe_allow_html=True
-                    )
-
-                st.markdown('</div>', unsafe_allow_html=True)
-
-
-        # ====================================================
-        # NO DETECTION
-        # ====================================================
 
         else:
-
             st.markdown(
-                '<div class="result-label">'
-                'DETECTION STATUS'
-                '</div>',
-                unsafe_allow_html=True
+                '<div class="result-label">DETECTION STATUS</div>',
+                unsafe_allow_html=True,
             )
 
             st.markdown(
-                '<div class="result-value">'
-                'No segmentation detected'
-                '</div>',
-                unsafe_allow_html=True
+                '<div class="result-value">No segmentation detected</div>',
+                unsafe_allow_html=True,
             )
-
-
-            # ------------------------------------------------
-            # IMPORTANT INFORMATION
-            # ------------------------------------------------
 
             st.markdown(
-                f'''
-                <div class="warning-box">
-
-                    The model did not produce a prediction
-                    above the current confidence threshold of {confidence_threshold:.2f}.
-
-                </div>
-                ''',
-                unsafe_allow_html=True
+                f'<div class="warning-box">'
+                f'The model did not produce a prediction above the current '
+                f'confidence threshold of {confidence_threshold:.2f}. '
+                f'Try a lower threshold if appropriate, but interpret low-confidence '
+                f'predictions cautiously.'
+                f'</div>',
+                unsafe_allow_html=True,
             )
-
-
-            # ------------------------------------------------
-            # IMAGE INFORMATION
-            # ------------------------------------------------
-
-            image_width, image_height = image.size
 
             st.markdown(
                 '<div style="margin-top:1.5rem;">'
-                '<div class="section-label">'
-                'IMAGE / INFERENCE INFORMATION'
-                '</div>',
-                unsafe_allow_html=True
+                '<div class="section-label">IMAGE / INFERENCE INFORMATION</div>',
+                unsafe_allow_html=True,
             )
 
             n1, n2, n3 = st.columns(3)
 
-            with n1:
+            no_detection_cards = [
+                ("Image Resolution", f"{image_width} × {image_height}"),
+                ("Threshold", f"{confidence_threshold:.2f}"),
+                ("Inference Time", f"{inference_time * 1000:.0f} ms"),
+            ]
 
-                st.markdown(
-                    '<div class="result-label">Image Resolution</div>',
-                    unsafe_allow_html=True
-                )
+            for column, (label, value) in zip((n1, n2, n3), no_detection_cards):
+                with column:
+                    st.markdown(
+                        f'<div class="metric-card">'
+                        f'<div class="result-label">{label}</div>'
+                        f'<div class="result-value">{value}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
 
-                st.markdown(
-                    f'<div class="result-value">'
-                    f'{image_width} × {image_height}'
-                    f'</div>',
-                    unsafe_allow_html=True
-                )
-
-            with n2:
-
-                st.markdown(
-                    '<div class="result-label">Threshold</div>',
-                    unsafe_allow_html=True
-                )
-
-                st.markdown(
-                    f'<div class="result-value">'
-                    f'{confidence_threshold:.2f}'
-                    f'</div>',
-                    unsafe_allow_html=True
-                )
-
-            with n3:
-
-                st.markdown(
-                    '<div class="result-label">Inference Time</div>',
-                    unsafe_allow_html=True
-                )
-
-                st.markdown(
-                    f'<div class="result-value">'
-                    f'{inference_time * 1000:.0f} ms'
-                    f'</div>',
-                    unsafe_allow_html=True
-                )
-
-            st.markdown('</div>', unsafe_allow_html=True)
-
+        st.markdown(
+            '<div class="disclaimer">'
+            'Research prototype for academic use. Predictions are model outputs and '
+            'should not be interpreted as a clinical diagnosis.'
+            '</div>',
+            unsafe_allow_html=True,
+        )
 
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -663,12 +554,8 @@ if uploaded_file is not None:
 # ============================================================
 
 st.markdown(
-    '''
-    <div class="footer">
-        BREAST ULTRASOUND SEGMENTATION
-        &nbsp;·&nbsp;
-        PRAGMATISM
-    </div>
-    ''',
-    unsafe_allow_html=True
+    '<div class="footer">'
+    'BREAST ULTRASOUND SEGMENTATION &nbsp;·&nbsp; YOLO26'
+    '</div>',
+    unsafe_allow_html=True,
 )

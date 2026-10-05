@@ -10,7 +10,7 @@ from ultralytics import YOLO
 # ============================================================
 
 st.set_page_config(
-    page_title="Breast Ultrasound Segmentation",
+    page_title="Deep Learning-Based Breast Lesion Segmentation",
     page_icon="◈",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -56,8 +56,40 @@ st.markdown(
             color: #858585;
             font-size: 0.92rem;
             line-height: 1.55;
-            margin-bottom: 2.5rem;
-            max-width: 760px;
+            margin-bottom: 1.4rem;
+            max-width: 820px;
+        }
+
+        .intro-divider {
+            height: 1px;
+            background: #292929;
+            width: 100%;
+            margin: 0.3rem 0 1.6rem;
+        }
+
+        .intro-section {
+            max-width: 900px;
+            margin-bottom: 2.7rem;
+        }
+
+        .intro-label {
+            font-size: 0.64rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #666666;
+            margin-bottom: 0.7rem;
+        }
+
+        .intro-text {
+            color: #A0A0A0;
+            font-size: 0.84rem;
+            line-height: 1.75;
+            margin: 0;
+        }
+
+        .intro-text strong {
+            color: #D0D0D0;
+            font-weight: 500;
         }
 
         .section-label {
@@ -278,6 +310,26 @@ st.markdown(
     'YOLO26-based instance segmentation for breast ultrasound images. '
     'Upload an image to obtain the predicted lesion class, confidence, '
     'segmentation coverage, and inference information.'
+    '</div>',
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    '<div class="intro-divider"></div>'
+    '<div class="intro-section">'
+    '<div class="intro-label">ABOUT THE PROJECT</div>'
+    '<p class="intro-text">'
+    'This project presents a deep learning-based approach for the '
+    '<strong>segmentation and classification of breast lesions in ultrasound images</strong>. '
+    'The system uses a YOLO26 instance-segmentation model to identify regions of interest, '
+    'outline detected lesions at the pixel level, and classify them as '
+    '<strong>Normal, Benign, or Malignant</strong>. By combining lesion localization, '
+    'segmentation, and classification in a single model, the application provides a '
+    'compact and accessible way to examine model predictions from breast ultrasound data. '
+    'This interface is intended as an <strong>academic research prototype</strong> for '
+    'demonstrating the project\'s trained model and its outputs, rather than as a replacement '
+    'for professional medical interpretation.'
+    '</p>'
     '</div>',
     unsafe_allow_html=True,
 )

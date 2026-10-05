@@ -269,7 +269,7 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="title">Breast Ultrasound<br>Segmentation</div>',
+    '<div class="title">Deep Learning-Based Segmentation and Classification<br>of Breast Lesions in Ultrasound Datasets</div>',
     unsafe_allow_html=True,
 )
 
